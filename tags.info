@@ -1,0 +1,7 @@
+; $Id: tags.info,v 1.4 2012/03/30 05:50:56 dries Exp $
+name = Tags
+package = Drupal4You
+version = VERSION
+core = 6.x
+
+dependencies[] = taxonomy
