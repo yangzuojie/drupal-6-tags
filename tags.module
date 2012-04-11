@@ -15,6 +15,14 @@ function tags_menu() {
     'type' => MENU_CALLBACK
   );
 
+  $items['tags/save'] = array(
+    'page callback' => 'tags_save',
+    'access callback' => 'user_access',
+    'access arguments' => array('manage own tags'),
+    'file' => 'tags.pages.inc',
+    'type' => MENU_CALLBACK
+  );
+
   return $items;
 }
 
@@ -35,7 +43,30 @@ function tags_theme() {
   return array(
     'tags_dashboard_page' => array(
       'template' => 'template/dashboard-page',
-      'arguments' => array('data '=> array()),
+      'arguments' => array('data'=> NULL),
     ),
   );
+}
+
+/**
+ * Implementation of hook_taxonomy
+ */
+function tags_taxonomy($op, $type, $array = NULL) {
+  switch($op) {
+    case 'delete':
+      if($type == 'vocabulary') {
+        db_query("DELETE FROM {vocabulary_user} WHERE vid = %d", $array['vid']);
+      }
+      break;
+
+    case 'insert':
+      if($type == 'vocabulary') {
+        global $user;
+        db_query("INSERT INTO {vocabulary_user} (vid, uid) VALUES (%d, %d)", $array['vid'], $user->uid);
+      }
+      break;
+
+    case 'update':
+      break;
+  }
 }
