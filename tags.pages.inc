@@ -17,10 +17,7 @@ function tags_dashboard_page() {
   $result = db_query("SELECT v.* FROM {vocabulary} v LEFT JOIN {vocabulary_user} vu ON v.vid = vu.vid WHERE vu.uid = %d", $user->uid);
   $data_list = array();
   while ($data = db_fetch_object($result)) {
-    $children = taxonomy_get_tree($data->vid);
-    if($children) {
-      $children = convert_tree_data($children);
-    }
+    $children = tags_convert_tree_data(tags_taxonomy_get_tree($data->vid));
 
     $data_list[] = array(
         'id' => 'V' . $data->vid,
@@ -84,16 +81,49 @@ function tags_save() {
   }
 }
 
+function tags_taxonomy_get_tree($vid){
+  $result_tree = array();
+  $terms = array();
+  foreach(taxonomy_get_tree($vid) as $term){
+    if(isset($terms[$term->tid])){
+      $term->children = $terms[$term->tid]->children;
+      $terms[$term->tid] = $term;
+    }else{
+      $terms[$term->tid] = $term;
+    }
+
+    if($term->depth === 0){
+      $result_tree[$term->tid] = &$terms[$term->tid];
+      continue;
+    }
+
+    foreach($term->parents as $tid){
+      if($tid){
+        if(!isset($terms[$tid])){
+          $terms[$tid] = new stdClass();
+        }
+        $terms[$tid]->children[$term->tid] = &$terms[$term->tid];
+      }
+    }
+  }
+  return $result_tree;
+}
+
 /**
  *
  */
-function convert_tree_data($term_list) {
+function tags_convert_tree_data($term_tree) {
   $data_list = array();
-  foreach($term_list as $term) {
-    $data_list[] = array(
+  foreach($term_tree as $term) {
+    $data = array(
         'id' => $term->tid,
         'text' => $term->name,
       );
+
+     if(!empty($term->children)) {
+      $data['children'] = tags_convert_tree_data($term->children);
+    }
+    $data_list[] = $data;
   }
   return $data_list;
 }
