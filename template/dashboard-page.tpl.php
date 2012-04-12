@@ -38,7 +38,10 @@
   }
   function remove(){
     var node = $('#taxonomy-tt').tree('getSelected');
-    $('#taxonomy-tt').tree('remove', node.target);
+    var parent = $('#taxonomy-tt').tree('getParent', node.target).id;
+    $.post( '<?php echo url('tags/remove') ?>', {id: node.id, parent: parent}, function(data){
+      $('#taxonomy-tt').tree('remove', node.target);
+    }, 'json');
   }
 </script>
 

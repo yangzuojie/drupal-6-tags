@@ -23,6 +23,14 @@ function tags_menu() {
     'type' => MENU_CALLBACK
   );
 
+  $items['tags/remove'] = array(
+    'page callback' => 'tags_remove',
+    'access callback' => 'user_access',
+    'access arguments' => array('manage own tags'),
+    'file' => 'tags.pages.inc',
+    'type' => MENU_CALLBACK
+  );
+
   return $items;
 }
 

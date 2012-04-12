@@ -81,6 +81,30 @@ function tags_save() {
   }
 }
 
+/**
+ *
+ */
+function tags_remove() {
+  $id = $_POST['id'];
+  $parent = $_POST['parent'];
+
+  if($parent === '0') {
+      $vid = substr($id, 1);
+      if(is_numeric($vid)) {
+        taxonomy_del_vocabulary($vid);
+      }
+    } else {
+      if(is_numeric($id)) {
+        taxonomy_del_term($id);
+      }
+    }
+
+    echo json_encode(array());
+}
+
+/**
+ *
+ */
 function tags_taxonomy_get_tree($vid){
   $result_tree = array();
   $terms = array();
