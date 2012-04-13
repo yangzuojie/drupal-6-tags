@@ -63,33 +63,3 @@ function tags_theme() {
     ),
   );
 }
-
-/**
- * Implementation of hook_taxonomy
- */
-function tags_taxonomy($op, $type, $array = NULL) {
-  switch($op) {
-    case 'delete':
-      if($type == 'vocabulary') {
-        db_query("DELETE FROM {vocabulary_user} WHERE vid = %d", $array['vid']);
-      }
-      break;
-
-    case 'insert':
-      if($type == 'vocabulary') {
-        global $user;
-        db_query("INSERT INTO {vocabulary_user} (vid, uid) VALUES (%d, %d)", $array['vid'], $user->uid);
-      }
-      break;
-
-    case 'update':
-      break;
-  }
-}
-
-/**
- * Implementation of hook_form_search_form_alter
- */
-function tags_form_taxonomy_overview_vocabularies_alter(&$form, $form_state) {
-  print_r($form);exit();
-}

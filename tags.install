@@ -4,21 +4,6 @@
  * Implementation of hook_schema().
  */
 function tags_schema() {
-  $schema['vocabulary_user'] = array(
-    'fields' => array(
-      'vid' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'uid' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-    ),
-    'primary key' => array('vid', 'uid'),
-  );
 
   $schema['tag_hierarchy'] = array(
     'fields' => array(

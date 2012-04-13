@@ -1,0 +1,109 @@
+<?php
+
+/**
+ * Implementation of hook_menu_alter
+ */
+function custom_taxonomy_menu_alter(&$items) {
+  $items['admin/content/taxonomy']['page arguments'] = array('custom_taxonomy_overview_vocabularies');
+}
+
+/**
+ *
+ */
+function custom_taxonomy_overview_vocabularies() {
+  global $user;
+  if($user->uid == 1) {
+    $vocabularies = custom_taxonomy_get_vocabularies();
+  } else {
+    $vocabularies = custom_taxonomy_get_vocabularies($user->uid);
+  }
+  $form = array('#tree' => TRUE);
+  foreach ($vocabularies as $vocabulary) {
+    $types = array();
+    foreach ($vocabulary->nodes as $type) {
+      $node_type = node_get_types('name', $type);
+      $types[] = $node_type ? check_plain($node_type) : check_plain($type);
+    }
+    $form[$vocabulary->vid]['#vocabulary'] = (array)$vocabulary;
+    $form[$vocabulary->vid]['name'] = array('#value' => check_plain($vocabulary->name));
+    $form[$vocabulary->vid]['types'] = array('#value' => implode(', ', $types));
+    $form[$vocabulary->vid]['weight'] = array('#type' => 'weight', '#delta' => 10, '#default_value' => $vocabulary->weight);
+    $form[$vocabulary->vid]['edit'] = array('#value' => l(t('edit vocabulary'), "admin/content/taxonomy/edit/vocabulary/$vocabulary->vid"));
+    $form[$vocabulary->vid]['list'] = array('#value' => l(t('list terms'), "admin/content/taxonomy/$vocabulary->vid"));
+    $form[$vocabulary->vid]['add'] = array('#value' => l(t('add terms'), "admin/content/taxonomy/$vocabulary->vid/add/term"));
+  }
+
+  // Only make this form include a submit button and weight if more than one
+  // vocabulary exists.
+  if (count($vocabularies) > 1) {
+    $form['submit'] = array('#type' => 'submit', '#value' => t('Save'));
+  }
+  elseif (isset($vocabulary)) {
+    unset($form[$vocabulary->vid]['weight']);
+  }
+
+  $form['#theme'] = 'taxonomy_overview_vocabularies';
+
+  return $form;
+}
+
+/**
+ *
+ */
+function custom_taxonomy_get_vocabularies($uid = NULL, $type = NULL) {
+  if ($type) {
+    if ($uid) {
+      $result = db_query(db_rewrite_sql("SELECT v.vid, v.*, n.type FROM {vocabulary} v LEFT JOIN {vocabulary_node_types} n ON v.vid = n.vid LEFT JOIN {vocabulary_user} vu ON vu.vid = v.vid AND vu.uid = %d AND n.type = '%s' ORDER BY v.weight, v.name", 'v', 'vid'), $uid, $type);
+    } else {
+      $result = db_query(db_rewrite_sql("SELECT v.vid, v.*, n.type FROM {vocabulary} v LEFT JOIN {vocabulary_node_types} n ON v.vid = n.vid WHERE n.type = '%s' ORDER BY v.weight, v.name", 'v', 'vid'), $type);
+    }
+  }
+  else {
+    if ($uid) {
+      $result = db_query(db_rewrite_sql('SELECT v.*, n.type FROM {vocabulary} v LEFT JOIN {vocabulary_node_types} n ON v.vid = n.vid LEFT JOIN {vocabulary_user} vu ON vu.vid = v.vid WHERE vu.uid = %d ORDER BY v.weight, v.name', 'v', 'vid'), $uid);
+    } else {
+      $result = db_query(db_rewrite_sql('SELECT v.*, n.type FROM {vocabulary} v LEFT JOIN {vocabulary_node_types} n ON v.vid = n.vid ORDER BY v.weight, v.name', 'v', 'vid'));
+    }
+  }
+
+  $vocabularies = array();
+  $node_types = array();
+  while ($voc = db_fetch_object($result)) {
+    // If no node types are associated with a vocabulary, the LEFT JOIN will
+    // return a NULL value for type.
+    if (isset($voc->type)) {
+      $node_types[$voc->vid][$voc->type] = $voc->type;
+      unset($voc->type);
+      $voc->nodes = $node_types[$voc->vid];
+    }
+    elseif (!isset($voc->nodes)) {
+      $voc->nodes = array();
+    }
+    $vocabularies[$voc->vid] = $voc;
+  }
+
+  return $vocabularies;
+}
+
+/**
+ * Implementation of hook_taxonomy
+ */
+function custom_taxonomy_taxonomy($op, $type, $array = NULL) {
+  switch($op) {
+    case 'delete':
+      if($type == 'vocabulary') {
+        db_query("DELETE FROM {vocabulary_user} WHERE vid = %d", $array['vid']);
+      }
+      break;
+
+    case 'insert':
+      if($type == 'vocabulary') {
+        global $user;
+        db_query("INSERT INTO {vocabulary_user} (vid, uid) VALUES (%d, %d)", $array['vid'], $user->uid);
+      }
+      break;
+
+    case 'update':
+      break;
+  }
+}
