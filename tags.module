@@ -31,6 +31,14 @@ function tags_menu() {
     'type' => MENU_CALLBACK
   );
 
+  $items['tags/drop'] = array(
+    'page callback' => 'tags_drop',
+    'access callback' => 'user_access',
+    'access arguments' => array('manage own tags'),
+    'file' => 'tags.pages.inc',
+    'type' => MENU_CALLBACK
+  );
+
   return $items;
 }
 
@@ -77,4 +85,11 @@ function tags_taxonomy($op, $type, $array = NULL) {
     case 'update':
       break;
   }
+}
+
+/**
+ * Implementation of hook_form_search_form_alter
+ */
+function tags_form_taxonomy_overview_vocabularies_alter(&$form, $form_state) {
+  print_r($form);exit();
 }

@@ -23,6 +23,11 @@
           left: e.pageX,
           top: e.pageY
         });
+      },
+      onDrop: function(targetNode, source, point){
+        var targetId = $('#taxonomy-tt').tree('getNode', targetNode).id;
+        $.post( '<?php echo url('tags/drop') ?>', {id: source.id, target_id: targetId, point: point}, function(data){
+        }, 'json');
       }
     });
   });

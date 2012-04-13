@@ -76,7 +76,7 @@ function tags_save() {
 
       taxonomy_save_term($term);
 
-      echo json_encode(array('id' => $term['tid'])); 
+      echo json_encode(array('id' => $term['tid']));
     }
   }
 }
@@ -100,6 +100,24 @@ function tags_remove() {
     }
 
     echo json_encode(array());
+}
+
+/**
+ *
+ */
+function tags_drop() {
+  $id = $_POST['id'];
+  $target_id = $_POST['target_id'];
+  $point = $_POST['point'];
+
+  if(strpos($id, 'V') === false && is_numeric($id)) { // Item
+    //@TODO
+  } else { // Voacabulary
+    $vid = substr($id, 1);
+    //@TODO
+  }
+
+  echo json_encode(array()); 
 }
 
 /**
