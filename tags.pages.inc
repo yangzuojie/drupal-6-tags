@@ -26,6 +26,6 @@ function tags_manage_page() {
  * tags/vocabulary/%/ajax
  */
 function tags_manage_vocabulary_ajax($vid) {
-  //@TODO
+  $term_list = taxonomy_get_tree($vid);
   echo theme('tags_manage_vocabulary_ajax', array('term_list' => $term_list));
 }

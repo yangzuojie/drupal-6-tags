@@ -17,7 +17,7 @@ function tags_menu() {
 
   $items['tags/manage/vocabulary/%/ajax'] = array(
     'page callback' => 'tags_manage_vocabulary_ajax',
-    'page arguments' => array(2),
+    'page arguments' => array(3),
     'access callback' => 'user_access',
     'access arguments' => array('manage own tags'),
     'file' => 'tags.pages.inc',
