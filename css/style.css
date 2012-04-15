@@ -1,17 +1,7 @@
-h2 {
-	font-size:18px;
-	color:#333;
-	font-weight:bold;
-	margin:0;
-	margin-bottom:15px;
+#tags-term-div {
+	margin-top:15px;
 }
-.demo-info{
-	background:#FFFEE6;
-	color:#8F5700;
-	padding:12px;
-}
-.demo-tip{
-	width:24px;
-	height:16px;
-	float:left;
+
+#tags-term-select {
+	width: 120px;
 }

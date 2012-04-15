@@ -15,24 +15,9 @@ function tags_menu() {
     'type' => MENU_CALLBACK
   );
 
-  $items['tags/save'] = array(
-    'page callback' => 'tags_save',
-    'access callback' => 'user_access',
-    'access arguments' => array('manage own tags'),
-    'file' => 'tags.pages.inc',
-    'type' => MENU_CALLBACK
-  );
-
-  $items['tags/remove'] = array(
-    'page callback' => 'tags_remove',
-    'access callback' => 'user_access',
-    'access arguments' => array('manage own tags'),
-    'file' => 'tags.pages.inc',
-    'type' => MENU_CALLBACK
-  );
-
-  $items['tags/drop'] = array(
-    'page callback' => 'tags_drop',
+  $items['tags/vocabulary/%/ajax'] = array(
+    'page callback' => 'tags_vocabulary_ajax',
+    'page arguments' => array(2),
     'access callback' => 'user_access',
     'access arguments' => array('manage own tags'),
     'file' => 'tags.pages.inc',
@@ -59,6 +44,11 @@ function tags_theme() {
   return array(
     'tags_dashboard_page' => array(
       'template' => 'template/dashboard-page',
+      'arguments' => array('data'=> NULL),
+    ),
+
+    'tags_vocabulary' => array(
+      'template' => 'template/vocabulary',
       'arguments' => array('data'=> NULL),
     ),
   );
