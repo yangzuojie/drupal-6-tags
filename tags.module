@@ -7,16 +7,16 @@
 function tags_menu() {
   $items = array();
 
-  $items['tags/dashboard'] = array(
-    'page callback' => 'tags_dashboard_page',
+  $items['tags/manage'] = array(
+    'page callback' => 'tags_manage_page',
     'access callback' => 'user_access',
     'access arguments' => array('manage own tags'),
     'file' => 'tags.pages.inc',
     'type' => MENU_CALLBACK
   );
 
-  $items['tags/vocabulary/%/ajax'] = array(
-    'page callback' => 'tags_vocabulary_ajax',
+  $items['tags/manage/vocabulary/%/ajax'] = array(
+    'page callback' => 'tags_manage_vocabulary_ajax',
     'page arguments' => array(2),
     'access callback' => 'user_access',
     'access arguments' => array('manage own tags'),
@@ -42,13 +42,13 @@ function tags_perm() {
  */
 function tags_theme() {
   return array(
-    'tags_dashboard_page' => array(
-      'template' => 'template/dashboard-page',
+    'tags_manage_page' => array(
+      'template' => 'template/manage-page',
       'arguments' => array('data'=> NULL),
     ),
 
-    'tags_vocabulary' => array(
-      'template' => 'template/vocabulary',
+    'tags_manage_vocabulary_ajax' => array(
+      'template' => 'template/manage-vocabulary-ajax',
       'arguments' => array('data'=> NULL),
     ),
   );

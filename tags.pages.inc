@@ -1,9 +1,9 @@
 <?php
 
 /**
- * tags/dashboard
+ * tags/manage
  */
-function tags_dashboard_page() {
+function tags_manage_page() {
 
   global $user;
 
@@ -19,13 +19,13 @@ function tags_dashboard_page() {
 
   drupal_add_js($path . '/js/tags.js');
 
-  return theme('tags_dashboard_page', array('vocabulary_list' => $vocabulary_list));
+  return theme('tags_manage_page', array('vocabulary_list' => $vocabulary_list));
 }
 
 /**
  * tags/vocabulary/%/ajax
  */
-function tags_vocabulary_ajax($vid) {
+function tags_manage_vocabulary_ajax($vid) {
   //@TODO
-  echo theme('tags_vocabulary', array('term_list' => $term_list));
+  echo theme('tags_manage_vocabulary_ajax', array('term_list' => $term_list));
 }
