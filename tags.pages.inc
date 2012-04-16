@@ -168,7 +168,7 @@ function tags_get_tree($vid_list, $parent = 0, $depth = -1, $max_depth = NULL) {
       $term->parents = $parents[$vid][$child];
       $tree[] = $term;
       if (!empty($tags_children[$vid][$child])) {
-        $tree = array_merge($tree, taxonomy_get_tree($vid, $child, $depth, $max_depth));
+        $tree = array_merge($tree, tags_get_tree($vid_list, $child, $depth, $max_depth));
       }
     }
   }
