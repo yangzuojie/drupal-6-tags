@@ -5,7 +5,3 @@
 <option><?php echo $term->name ?></option>
 <?php endforeach; ?>
 </select>
-
-<div id="tags-term-add-div">
-<input type="button" value="<?php echo t('Add') ?>">
-</div>

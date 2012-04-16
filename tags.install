@@ -18,27 +18,7 @@ function tags_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
-      'tag_id' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
     ),
-  );
-
-  $schema['tag'] = array(
-    'fields' => array(
-      'tag_id' => array(
-        'type' => 'serial',
-        'not null' => TRUE,
-      ),
-      'uid' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-    ),
-    'primary key' => array('tag_id'),
   );
 
   return $schema;

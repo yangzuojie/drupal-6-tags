@@ -8,7 +8,8 @@ function tags_menu() {
   $items = array();
 
   $items['tags/manage'] = array(
-    'page callback' => 'tags_manage_page',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('tags_manage_form'),
     'access callback' => 'user_access',
     'access arguments' => array('manage own tags'),
     'file' => 'tags.pages.inc',
@@ -42,9 +43,8 @@ function tags_perm() {
  */
 function tags_theme() {
   return array(
-    'tags_manage_page' => array(
-      'template' => 'template/manage-page',
-      'arguments' => array('data'=> NULL),
+    'tags_manage_form' => array(
+      'arguments' => array('form' => array()),
     ),
 
     'tags_manage_vocabulary_ajax' => array(

@@ -11,3 +11,7 @@
 
 <div id="tags-term-div">
 </div>
+
+<div>
+<?php echo $data['tags_table'] ?>
+</div>
