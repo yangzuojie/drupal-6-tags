@@ -71,6 +71,15 @@ function tags_manage_form(&$form_state) {
     );
   }
 
+  if(!empty($form_state['values'])) {
+    foreach($form as $key => $value) {
+      if(is_array($value) && isset($value['#term']) && $value['parent']['#default_value']) {
+        unset($form[$key]);
+        $form = array_insert_after('tid:' . $value['parent']['#default_value'], $form, $key, $value);
+      }
+    }
+  }
+
   $form['submit'] = array('#type' => 'submit', '#value' => t('Save'), '#weight' => PHP_INT_MAX);
 
   return $form;
@@ -165,4 +174,21 @@ function tags_get_tree($vid_list, $parent = 0, $depth = -1, $max_depth = NULL) {
   }
 
   return $tree;
+}
+
+/**
+ *
+ */
+function array_insert_after($key, array &$array, $new_key, $new_value) {
+  if (array_key_exists($key, $array)) {
+    $new = array();
+    foreach ($array as $k => $value) {
+      $new[$k] = $value;
+      if ($k === $key) {
+        $new[$new_key] = $new_value;
+      }
+    }
+    return $new;
+  }
+  return FALSE;
 }
