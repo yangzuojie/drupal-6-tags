@@ -31,56 +31,75 @@ function tags_manage_form(&$form_state) {
 
   $form[''] = array('#value' => '<div id="tags-term-div"></div>');
 
+  $form['add'] = array('#type' => 'submit', '#value' => t('Add'), '#id' => 'add-term-submit', '#attributes' => array('style' => 'display:none'));
+
   $tree = tags_get_tree($vid_list);
 
   // Build the actual form.
   foreach ($tree as $term) {
     // Save the term for the current page so we don't have to load it a second time.
-    $key = 'tid:'. $term->tid;
-
-    $form[$key]['#term'] = (array)$term;
-
-    if (isset($term->parents)) {
-      $form[$key]['#term']['parent'] = $term->parent = $term->parents[0];
-      unset($form[$key]['#term']['parents'], $term->parents);
-    }
-
-    if(isset($form_state['values'][$key])) {
-      $form[$key]['#term']['depth'] = $form_state['values'][$key]['depth'];
-      $form[$key]['#term']['parent'] = $form_state['values'][$key]['parent'];
-    }
-
-    $form[$key]['view'] = array('#value' => l($term->name, "taxonomy/term/$term->tid"));
-
-    $form['#parent_fields'] = TRUE;
-    $form[$key]['tid'] = array(
-      '#type' => 'hidden',
-      '#value' => $term->tid
-    );
-    $form[$key]['parent'] = array(
-      '#type' => 'hidden',
-      // Yes, default_value on a hidden. It needs to be changeable by the javascript.
-      '#default_value' => $form[$key]['#term']['parent'],
-    );
-    $form[$key]['depth'] = array(
-      '#type' => 'hidden',
-      // Same as above, the depth is modified by javascript, so it's a default_value.
-      '#default_value' => $form[$key]['#term']['depth'],
-    );
+    _tags_build_term_form($form, $term);
   }
 
   if(!empty($form_state['values'])) {
-    foreach($form as $key => $value) {
-      if(is_array($value) && isset($value['#term']) && $value['parent']['#default_value']) {
-        unset($form[$key]);
-        $form = array_insert_after('tid:' . $value['parent']['#default_value'], $form, $key, $value);
+    $term_list = array();
+    foreach($form_state['values'] as $key => $value) {
+      if(strpos($key, 'tid:') !== false) {
+        $term = taxonomy_get_term($value['tid']);
+        $term->parent = $value['parent'];
+        $term->depth = $value['depth'];
+
+        _tags_build_term_form($form, $term);
       }
+    }
+  }
+
+  if(!empty($form_state['clicked_button']['#post']['add_term_id'])) {
+    foreach($form_state['clicked_button']['#post']['add_term_id'] as $add_term_id) {
+      _tags_build_term_form($form, taxonomy_get_term($add_term_id));
     }
   }
 
   $form['submit'] = array('#type' => 'submit', '#value' => t('Save'), '#weight' => PHP_INT_MAX);
 
   return $form;
+}
+
+/**
+ *
+ */
+function _tags_build_term_form(&$form, $term) {
+  $key = 'tid:'. $term->tid;
+
+  $form[$key]['#term'] = (array)$term;
+
+  if (isset($term->parents)) {
+    $form[$key]['#term']['parent'] = $term->parent = $term->parents[0];
+    unset($form[$key]['#term']['parents'], $term->parents);
+  }
+
+  if(isset($form_state['values'][$key])) {
+    $form[$key]['#term']['depth'] = $form_state['values'][$key]['depth'];
+    $form[$key]['#term']['parent'] = $form_state['values'][$key]['parent'];
+  }
+
+  $form[$key]['view'] = array('#value' => l($term->name, "taxonomy/term/$term->tid"));
+
+  $form['#parent_fields'] = TRUE;
+  $form[$key]['tid'] = array(
+    '#type' => 'hidden',
+    '#value' => $term->tid
+  );
+  $form[$key]['parent'] = array(
+    '#type' => 'hidden',
+    // Yes, default_value on a hidden. It needs to be changeable by the javascript.
+    '#default_value' => $form[$key]['#term']['parent'],
+  );
+  $form[$key]['depth'] = array(
+    '#type' => 'hidden',
+    // Same as above, the depth is modified by javascript, so it's a default_value.
+    '#default_value' => $form[$key]['#term']['depth'],
+  );
 }
 
 /**
@@ -126,12 +145,12 @@ function theme_tags_manage_form($form) {
  */
 function tags_manage_form_submit($form, &$form_state) {
 
-  print_r('fds');exit();
-
   $order = array_flip(array_keys($form['#post'])); // Get the $_POST order.
   $form_state['values'] = array_merge($order, $form_state['values']); // Update our original form with the new order.
 
-  $form_state['rebuild'] = TRUE;
+  if($form_state['clicked_button']['#value'] == t('Add')) {
+    $form_state['rebuild'] = TRUE;
+  }
 }
 
 /**
@@ -141,18 +160,16 @@ function tags_manage_vocabulary_ajax($vid) {
   $term_list = taxonomy_get_tree($vid);
 
   if(empty($term_list)) {
-    $form[] = array('#value' => t('No terms available.'));
+    echo json_encode(array('hide' => TRUE, 'html' => t('No terms available.')));
   } else {
     $options = array();
     foreach($term_list as $term) {
       $options[$term->tid] = str_repeat('-', $term->depth) . $term->name;
     }
 
-    $form['add'] = array('#type' => 'submit', '#value' => t('Add'));
-    $form['term'] = array('#type' => 'select', '#options' => $options, '#multiple' => TRUE);
+    $form['add_term_id'] = array('#name' => 'add_term_id', '#type' => 'select', '#options' => $options, '#multiple' => TRUE);
+    echo json_encode(array('hide' => FALSE, 'html' => drupal_render($form)));
   }
-
-  echo drupal_render($form);
 }
 
 /**
