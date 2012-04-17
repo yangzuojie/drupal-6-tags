@@ -31,8 +31,6 @@ function tags_manage_form(&$form_state) {
 
   $form[''] = array('#value' => '<div id="tags-term-div"></div>');
 
-  $form['add'] = array('#type' => 'submit', '#value' => t('Add'));
-
   $tree = tags_get_tree($vid_list);
 
   // Build the actual form.
@@ -109,10 +107,14 @@ function theme_tags_manage_form($form) {
     }
   }
 
-  $header = array(t('Name'));
+  if (empty($rows)) {
+    $rows[] = array(array('data' => t('No terms available.')));
+  } else {
+    drupal_add_tabledrag('tags', 'match', 'parent', 'term-parent', 'term-parent', 'term-id', FALSE);
+    drupal_add_tabledrag('tags', 'depth', 'group', 'term-depth', NULL, NULL, FALSE);
+  }
 
-  drupal_add_tabledrag('tags', 'match', 'parent', 'term-parent', 'term-parent', 'term-id', FALSE);
-  drupal_add_tabledrag('tags', 'depth', 'group', 'term-depth', NULL, NULL, FALSE);
+  $header = array(t('Name'));
 
   $form['table'] = array('#value' => theme('table', $header, $rows, array('id' => 'tags')), '#weight' => PHP_INT_MAX-1);
 
@@ -123,6 +125,12 @@ function theme_tags_manage_form($form) {
  *
  */
 function tags_manage_form_submit($form, &$form_state) {
+
+  print_r('fds');exit();
+
+  $order = array_flip(array_keys($form['#post'])); // Get the $_POST order.
+  $form_state['values'] = array_merge($order, $form_state['values']); // Update our original form with the new order.
+
   $form_state['rebuild'] = TRUE;
 }
 
@@ -131,7 +139,20 @@ function tags_manage_form_submit($form, &$form_state) {
  */
 function tags_manage_vocabulary_ajax($vid) {
   $term_list = taxonomy_get_tree($vid);
-  echo theme('tags_manage_vocabulary_ajax', array('term_list' => $term_list));
+
+  if(empty($term_list)) {
+    $form[] = array('#value' => t('No terms available.'));
+  } else {
+    $options = array();
+    foreach($term_list as $term) {
+      $options[$term->tid] = str_repeat('-', $term->depth) . $term->name;
+    }
+
+    $form['add'] = array('#type' => 'submit', '#value' => t('Add'));
+    $form['term'] = array('#type' => 'select', '#options' => $options, '#multiple' => TRUE);
+  }
+
+  echo drupal_render($form);
 }
 
 /**
