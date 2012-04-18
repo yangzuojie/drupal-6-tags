@@ -109,7 +109,7 @@ function custom_taxonomy_taxonomy($op, $type, $array = NULL) {
 }
 
 /**
- *
+ * Implementation of hook_form_alter()
  */
 function tags_form_alter(&$form, $form_state, $form_id) {
   if (isset($form['type']) && isset($form['#node']) && (!variable_get('taxonomy_override_selector', FALSE)) && $form['type']['#value'] .'_node_form' == $form_id) {
@@ -184,5 +184,15 @@ function tags_form_alter(&$form, $form_state, $form_id) {
       $form['taxonomy']['#weight'] = -3;
       $form['taxonomy']['#tree'] = TRUE;
     }
+  }
+}
+
+/**
+ *
+ */
+function tags_form_taxonomy_form_vocabulary_alter(&$form, &$form_state) {
+  global $user;
+  if($user->uid != 1) {
+    unset($form['content_types']);
   }
 }
