@@ -46,10 +46,5 @@ function tags_theme() {
     'tags_manage_form' => array(
       'arguments' => array('form' => array()),
     ),
-
-    'tags_manage_vocabulary_ajax' => array(
-      'template' => 'template/manage-vocabulary-ajax',
-      'arguments' => array('data'=> NULL),
-    ),
   );
 }

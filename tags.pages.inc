@@ -150,6 +150,14 @@ function tags_manage_form_submit($form, &$form_state) {
 
   if($form_state['clicked_button']['#value'] == t('Add')) {
     $form_state['rebuild'] = TRUE;
+  } else {
+    global $user;
+    db_query('DELETE FROM {tag_hierarchy} WHERE TID IN (SELECT tid FROM {term_data} WHERE vid IN (SELECT vid FROM {vocabulary_user} WHERE uid = %d))', $user->uid);
+    foreach($form_state['values'] as $key => $value) {
+      if(strpos($key, 'tid:') !== false) {
+        db_query("INSERT INTO {tag_hierarchy} (tid, parent) VALUES (%d, %d)", $value['tid'], $value['parent']);
+      }
+    }
   }
 }
 
@@ -203,7 +211,7 @@ function tags_get_tree($vid_list, $parent = 0, $depth = -1, $max_depth = NULL) {
       $term->depth = $depth;
       // The "parent" attribute is not useful, as it would show one parent only.
       unset($term->parent);
-      $term->parents = $parents[$vid][$child];
+      $term->parents = $tags_parents[$vid][$child];
       $tree[] = $term;
       if (!empty($tags_children[$vid][$child])) {
         $tree = array_merge($tree, tags_get_tree($vid_list, $child, $depth, $max_depth));
@@ -212,21 +220,4 @@ function tags_get_tree($vid_list, $parent = 0, $depth = -1, $max_depth = NULL) {
   }
 
   return $tree;
-}
-
-/**
- *
- */
-function array_insert_after($key, array &$array, $new_key, $new_value) {
-  if (array_key_exists($key, $array)) {
-    $new = array();
-    foreach ($array as $k => $value) {
-      $new[$k] = $value;
-      if ($k === $key) {
-        $new[$new_key] = $new_value;
-      }
-    }
-    return $new;
-  }
-  return FALSE;
 }
