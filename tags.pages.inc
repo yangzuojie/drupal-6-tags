@@ -24,6 +24,7 @@ function tags_manage_form(&$form_state) {
   }
 
   $form['vocabulary'] = array(
+      '#title' => t('Vocabularies'),
       '#id' => 'tags-vocabulary-select',
       '#type' => 'select',
       '#options' => $vocabulary_options,
@@ -158,6 +159,8 @@ function tags_manage_form_submit($form, &$form_state) {
         db_query("INSERT INTO {tag_hierarchy} (tid, parent) VALUES (%d, %d)", $value['tid'], $value['parent']);
       }
     }
+
+    drupal_set_message('Save success');
   }
 }
 
