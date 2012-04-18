@@ -5,3 +5,21 @@
 #tags-term-select {
 	width: 120px;
 }
+
+#tags-tt li {
+	background: none;
+	padding:0 0 0.5em 0.5em;
+}
+
+#tags-tt li .tree-indent {
+	width: 0px;
+}
+
+.easyui-layout table {
+  margin: 0px;
+  width: auto;
+}
+
+.easyui-layout table td, th {
+	padding: 0px;
+}

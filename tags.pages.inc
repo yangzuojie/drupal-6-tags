@@ -224,3 +224,97 @@ function tags_get_tree($vid_list, $parent = 0, $depth = -1, $max_depth = NULL) {
 
   return $tree;
 }
+
+/**
+ * tags/content
+ */
+function tags_content_page() {
+  $path = drupal_get_path('module', 'tags');
+
+  drupal_add_css($path . '/easyui/themes/default/easyui.css', 'header');
+  drupal_add_css($path . '/easyui/themes/icon.css', 'header');
+  drupal_add_css($path . '/css/style.css', 'header');
+
+  drupal_add_js($path . '/easyui/jquery.easyui.min.js');
+
+  return theme('tags_content_page' , array());
+}
+
+/**
+ * tags/content/ajax/tree
+ */
+function tags_content_tree_ajax() {
+  global $user;
+  $result = db_query("SELECT v.* FROM {vocabulary} v LEFT JOIN {vocabulary_user} vu ON v.vid = vu.vid WHERE vu.uid = %d", $user->uid);
+  $vid_list = array();
+  while ($vocabulary = db_fetch_object($result)) {
+    $vid_list[] = $vocabulary->vid;
+  }
+  $tree = tags_convert_tree_data(tags_get_real_tree($vid_list));
+  echo json_encode($tree);
+}
+
+/**
+ * tags/content/ajax/node
+ */
+function tags_content_node_ajax() {
+  $result = db_query("SELECT * FROM {node} n LEFT JOIN {node_revisions} nr ON n.nid = nr.nid WHERE n.status = 1 ORDER BY created DESC");
+  $node_list = array();
+  $i = 0;
+  while ($node = db_fetch_object($result)) {
+    $i++;
+    $node->no = $i;
+    $node_list[] = $node;
+  }
+  echo json_encode(array('total' => count($node_list), 'rows' => $node_list));
+}
+
+/**
+ *
+ */
+function tags_get_real_tree($vid_list){
+  $result_tree = array();
+  $terms = array();
+  foreach(tags_get_tree($vid_list) as $term){
+    if(isset($terms[$term->tid])){
+      $term->children = $terms[$term->tid]->children;
+      $terms[$term->tid] = $term;
+    }else{
+      $terms[$term->tid] = $term;
+    }
+
+    if($term->depth === 0){
+      $result_tree[$term->tid] = &$terms[$term->tid];
+      continue;
+    }
+
+    foreach($term->parents as $tid){
+      if($tid){
+        if(!isset($terms[$tid])){
+          $terms[$tid] = new stdClass();
+        }
+        $terms[$tid]->children[$term->tid] = &$terms[$term->tid];
+      }
+    }
+  }
+  return $result_tree;
+}
+
+/**
+ *
+ */
+function tags_convert_tree_data($term_tree) {
+  $data_list = array();
+  foreach($term_tree as $term) {
+    $data = array(
+        'id' => $term->tid,
+        'text' => $term->name,
+      );
+
+     if(!empty($term->children)) {
+      $data['children'] = tags_convert_tree_data($term->children);
+    }
+    $data_list[] = $data;
+  }
+  return $data_list;
+}
