@@ -258,7 +258,18 @@ function tags_content_tree_ajax() {
  * tags/content/ajax/node
  */
 function tags_content_node_ajax() {
-  $result = db_query("SELECT * FROM {node} n LEFT JOIN {node_revisions} nr ON n.nid = nr.nid WHERE n.status = 1 ORDER BY created DESC");
+
+  $tid = $_POST['tid'];
+
+  if($tid) {//@TODO
+    $sql = 'SELECT DISTINCT(n.nid), n.sticky, n.title, n.created FROM {node} n WHERE n.status = 1 ORDER BY n.created DESC';
+    $sql_count = 'SELECT COUNT(DISTINCT(n.nid)) FROM {node} n WHERE n.status = 1';
+  } else {
+    $sql = 'SELECT DISTINCT(n.nid), n.sticky, n.title, n.created FROM {node} n WHERE n.status = 1 ORDER BY n.created DESC';
+    $sql_count = 'SELECT COUNT(DISTINCT(n.nid)) FROM {node} n WHERE n.status = 1';
+  }
+ 
+  $result = pager_query($sql, variable_get('default_nodes_main', 10), 0, $sql_count);
   $node_list = array();
   $i = 0;
   while ($node = db_fetch_object($result)) {
@@ -266,7 +277,10 @@ function tags_content_node_ajax() {
     $node->no = $i;
     $node_list[] = $node;
   }
-  echo json_encode(array('total' => count($node_list), 'rows' => $node_list));
+
+  global $pager_total;
+
+  echo json_encode(array('total' => $pager_total[0], 'rows' => $node_list));
 }
 
 /**

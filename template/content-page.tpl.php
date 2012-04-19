@@ -2,7 +2,8 @@
 $(function(){
   $('#tags-tt').tree({
     url: '<?php echo url('tags/content/ajax/tree') ?>',
-    onClick:function(node){
+    onClick:function(node) {
+      $('#tags-content-table').datagrid('load', {tid: node.id});
     }
   });
 
@@ -11,6 +12,7 @@ $(function(){
     border: false,
     fit: true,
     fitColumns: true,
+    pagination: true,
     onClickRow: function(rowIndex, rowData) {
       $.get('<?php echo url('tags/content/ajax/node') ?>' + '/' + rowData.nid, function(html) {
         $('#tags-node-content').html(html);
