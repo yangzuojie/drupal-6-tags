@@ -261,9 +261,13 @@ function tags_content_node_ajax() {
 
   $tid = $_POST['tid'];
 
-  if($tid) {//@TODO
-    $sql = 'SELECT DISTINCT(n.nid), n.sticky, n.title, n.created FROM {node} n WHERE n.status = 1 ORDER BY n.created DESC';
-    $sql_count = 'SELECT COUNT(DISTINCT(n.nid)) FROM {node} n WHERE n.status = 1';
+  if($tid && is_numeric($tid)) {
+    $tid_list = tags_get_all_children_tid($tid);
+
+    $placeholders = implode(',', $tid_list);
+
+    $sql = 'SELECT DISTINCT(n.nid), n.sticky, n.title, n.created FROM {node} n INNER JOIN {term_node} tn ON n.vid = tn.vid WHERE tn.tid IN ('. $placeholders .') AND n.status = 1 ORDER BY n.created DESC';
+    $sql_count = 'SELECT COUNT(DISTINCT(n.nid)) FROM {node} n INNER JOIN {term_node} tn ON n.vid = tn.vid WHERE tn.tid IN ('. $placeholders .') AND n.status = 1';
   } else {
     $sql = 'SELECT DISTINCT(n.nid), n.sticky, n.title, n.created FROM {node} n WHERE n.status = 1 ORDER BY n.created DESC';
     $sql_count = 'SELECT COUNT(DISTINCT(n.nid)) FROM {node} n WHERE n.status = 1';

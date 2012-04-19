@@ -4,6 +4,7 @@ $(function(){
     url: '<?php echo url('tags/content/ajax/tree') ?>',
     onClick:function(node) {
       $('#tags-content-table').datagrid('load', {tid: node.id});
+      $('#tags-node-content').html('');
     }
   });
 

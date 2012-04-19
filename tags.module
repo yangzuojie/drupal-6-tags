@@ -169,3 +169,17 @@ function tags_get_parents($tid, $key = 'tid') {
     return array();
   }
 }
+
+/**
+ *
+ */
+function tags_get_all_children_tid($tid, $tid_list=array()) {
+  $tid_list[] = $tid;
+  $children = tags_get_children($tid);
+  if (count($children) > 0) {
+    foreach ($children as $term) {
+      $tid_list = tags_get_all_children_tid($term->tid, $tid_list);
+    }
+  }
+  return $tid_list;
+}
