@@ -184,48 +184,6 @@ function tags_manage_vocabulary_ajax($vid) {
 }
 
 /**
- *
- */
-function tags_get_tree($vid_list, $parent = 0, $depth = -1, $max_depth = NULL) {
-  static $tags_children, $tags_parents, $tags_terms;
-
-  $vid = implode('-', $vid_list);
-
-  $depth++;
-
-  // We cache trees, so it's not CPU-intensive to call get_tree() on a term
-  // and its children, too.
-  if (!isset($tags_children[$vid])) {
-    $tags_children[$vid] = array();
-
-    $result = db_query(db_rewrite_sql('SELECT t.tid, t.*, parent FROM {term_data} t INNER JOIN {tag_hierarchy} h ON t.tid = h.tid WHERE t.vid IN (%s) ORDER BY weight, name', 't', 'tid'), implode(',', $vid_list));
-    while ($term = db_fetch_object($result)) {
-      $tags_children[$vid][$term->parent][] = $term->tid;
-      $tags_parents[$vid][$term->tid][] = $term->parent;
-      $tags_terms[$vid][$term->tid] = $term;
-    }
-  }
-
-  $max_depth = (is_null($max_depth)) ? count($tags_children[$vid]) : $max_depth;
-  $tree = array();
-  if ($max_depth > $depth && !empty($tags_children[$vid][$parent])) {
-    foreach ($tags_children[$vid][$parent] as $child) {
-      $term = drupal_clone($tags_terms[$vid][$child]);
-      $term->depth = $depth;
-      // The "parent" attribute is not useful, as it would show one parent only.
-      unset($term->parent);
-      $term->parents = $tags_parents[$vid][$child];
-      $tree[] = $term;
-      if (!empty($tags_children[$vid][$child])) {
-        $tree = array_merge($tree, tags_get_tree($vid_list, $child, $depth, $max_depth));
-      }
-    }
-  }
-
-  return $tree;
-}
-
-/**
  * tags/content
  */
 function tags_content_page() {
@@ -288,58 +246,15 @@ function tags_content_node_ajax() {
 }
 
 /**
- *
- */
-function tags_get_real_tree($vid_list){
-  $result_tree = array();
-  $terms = array();
-  foreach(tags_get_tree($vid_list) as $term){
-    if(isset($terms[$term->tid])){
-      $term->children = $terms[$term->tid]->children;
-      $terms[$term->tid] = $term;
-    }else{
-      $terms[$term->tid] = $term;
-    }
-
-    if($term->depth === 0){
-      $result_tree[$term->tid] = &$terms[$term->tid];
-      continue;
-    }
-
-    foreach($term->parents as $tid){
-      if($tid){
-        if(!isset($terms[$tid])){
-          $terms[$tid] = new stdClass();
-        }
-        $terms[$tid]->children[$term->tid] = &$terms[$term->tid];
-      }
-    }
-  }
-  return $result_tree;
-}
-
-/**
- *
- */
-function tags_convert_tree_data($term_tree) {
-  $data_list = array();
-  foreach($term_tree as $term) {
-    $data = array(
-        'id' => $term->tid,
-        'text' => $term->name,
-      );
-
-     if(!empty($term->children)) {
-      $data['children'] = tags_convert_tree_data($term->children);
-    }
-    $data_list[] = $data;
-  }
-  return $data_list;
-}
-
-/**
  * tags/content/node/content/%
  */
 function tags_content_node_content_ajax($node) {
   echo theme('node', $node);
+}
+
+/**
+ * tags/list
+ */
+function tags_list() {
+  return '';
 }
