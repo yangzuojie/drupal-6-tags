@@ -318,3 +318,10 @@ function tags_convert_tree_data($term_tree) {
   }
   return $data_list;
 }
+
+/**
+ * tags/content/node/content/%
+ */
+function tags_content_node_content_ajax($node) {
+  echo theme('node', $node);
+}

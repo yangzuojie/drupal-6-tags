@@ -49,6 +49,15 @@ function tags_menu() {
     'type' => MENU_CALLBACK
   );
 
+  $items['tags/content/ajax/node/%node'] = array(
+    'page callback' => 'tags_content_node_content_ajax',
+    'page arguments' => array(4),
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'file' => 'tags.pages.inc',
+    'type' => MENU_CALLBACK
+  );
+
   return $items;
 }
 
