@@ -37,14 +37,14 @@ function tags_menu() {
     'title' => t('Tag Content'),
     'page callback' => 'tags_content_page',
     'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'access arguments' => array('manage own tags'),
     'file' => 'tags.pages.inc',
   );
 
   $items['tags/content/ajax/tree'] = array(
     'page callback' => 'tags_content_tree_ajax',
     'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'access arguments' => array('manage own tags'),
     'file' => 'tags.pages.inc',
     'type' => MENU_CALLBACK
   );
