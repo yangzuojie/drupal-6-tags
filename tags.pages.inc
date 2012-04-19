@@ -256,5 +256,28 @@ function tags_content_node_content_ajax($node) {
  * tags/list
  */
 function tags_list() {
-  return '';
+  $output = '';
+  $sql = 'SELECT * FROM {vocabulary} v ORDER BY v.weight, v.name';
+  $sql_count = 'SELECT count(vid) FROM {vocabulary} v ORDER BY v.weight, v.name';
+
+  $result = pager_query($sql, variable_get('default_nodes_main', 10), 0, $sql_count);
+  while ($vocabulary = db_fetch_object($result)) {
+    $term_list = taxonomy_get_tree($vocabulary->vid);
+
+    $rows = array();
+    if(empty($term_list)) {
+      $rows[] = array('data' => array(t('No terms available.')));
+    } else {
+      foreach($term_list as $term) {
+        $row = array();
+        $row[] = (isset($term->depth) && $term->depth > 0 ? theme('indentation', $term->depth) : '') . l($term->name, "taxonomy/term/$term->tid");
+        $rows[] = array('data' => $row);
+      }
+    }
+
+    $header = array($vocabulary->name);
+    $output .= theme('table', $header, $rows);
+  }
+
+  return $output . theme('pager');
 }
