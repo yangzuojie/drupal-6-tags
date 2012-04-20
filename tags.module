@@ -27,7 +27,8 @@ function tags_menu() {
 
   $items['tags/list'] = array(
     'title' => t('Tag Tree List'),
-    'page callback' => 'tags_list',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('tags_list_form'),
     'access callback' => 'user_access',
     'access arguments' => array('manage own tags'),
     'file' => 'tags.pages.inc',

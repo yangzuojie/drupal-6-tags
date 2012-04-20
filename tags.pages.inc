@@ -255,12 +255,35 @@ function tags_content_node_content_ajax($node) {
 /**
  * tags/list
  */
-function tags_list() {
-  $output = '';
-  $sql = 'SELECT * FROM {vocabulary} v ORDER BY v.weight, v.name';
-  $sql_count = 'SELECT count(vid) FROM {vocabulary} v ORDER BY v.weight, v.name';
+function tags_list_form(&$form_state) {
+  $form = array();
 
-  $result = pager_query($sql, variable_get('default_nodes_main', 10), 0, $sql_count);
+  $keys = $_GET['keys'];
+
+  $form['#method'] = 'get';
+
+  $form['keys'] = array(
+      '#type' => 'textfield',
+      '#default_value' => $keys,
+    );
+
+  $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Search'),
+    );
+
+  $where = '';
+  $args = array();
+  if($keys) {
+    $where = ' WHERE v.name LIKE \'%s\' ';
+    $args[] = '%' . $keys . '%';
+  }
+
+  $output = '';
+  $sql = 'SELECT * FROM {vocabulary} v ' . $where . ' ORDER BY v.weight, v.name';
+  $sql_count = 'SELECT count(vid) FROM {vocabulary} v ' . $where . ' ORDER BY v.weight, v.name';
+
+  $result = pager_query($sql, variable_get('default_nodes_main', 10), 0, $sql_count, $args);
   while ($vocabulary = db_fetch_object($result)) {
     $term_list = taxonomy_get_tree($vocabulary->vid);
 
@@ -279,5 +302,13 @@ function tags_list() {
     $output .= theme('table', $header, $rows);
   }
 
-  return $output . theme('pager');
+  $form['results'] = array('#value' => $output . theme('pager'));
+
+  return $form;
+}
+
+/**
+ * tags/list
+ */
+function tags_list_form_submit($form, &$form_state) {
 }
